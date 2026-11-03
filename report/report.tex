@@ -16,15 +16,12 @@
 {\Large From Image Geometry and Web-Context Features\par}\vspace{8mm}
 {\large A reproducible study of the UCI Internet Advertisements dataset\par}\vspace{15mm}
 \begin{minipage}{.92\textwidth}
-\textbf{Administrative completion required before submission.} The supplied materials do not identify the submitting institution/faculty, course identifier, class, group, instructor, student names or IDs, or member contributions. These must be supplied by the group; they have not been invented. The R code is publicly hosted at \url{https://github.com/hlbathien/internet-advertisements-study}. Section 7 provides the actual local code and source locations.
-
-\begin{tabular}{p{.27\textwidth}p{.61\textwidth}}\toprule
-Required cover field & Status\\\midrule
-Faculty / institution & Not supplied\\
-Course / class / group & Not supplied\\
-Instructor & Not supplied\\
-Members and student IDs & Not supplied\\
-Contribution descriptions & Not supplied; describe actual member work\\\bottomrule
+\begin{tabular}{p{.30\textwidth}p{.58\textwidth}}
+Institution / faculty & [Institution and faculty]\\[5mm]
+Course / class / group & [Course, class and group]\\[5mm]
+Instructor & [Instructor name]\\[5mm]
+Members / student IDs & [Member names and student IDs]\\[5mm]
+Contributions & [Actual contribution of each member]
 \end{tabular}
 \end{minipage}\vfill
 \textbf{Language: English}\par
@@ -35,14 +32,14 @@ Analysis executed in R; independently checked in Python.\par
 \subsection{Problem, scope, and principal findings}
 The task is to predict whether a candidate image on a web page is an advertisement (\code{ad}) or not (\code{nonad}). The supplied file is not an image collection: it is a tabular representation containing image geometry and indicators extracted from surrounding web context. Consequently, this study evaluates classification from supplied features, not visual recognition from pixels.
 
-The selected full-feature ridge logistic model achieved held-out average precision (AP) of 0.863 and ROC AUC of 0.957. At a threshold selected exclusively on validation data, it detected 67 of 84 test advertisements, with 25 false alarms among 542 non-advertisements. Test F1 was 0.761. These results support useful discrimination within this benchmark, but do not establish contemporary-web performance, site-level transfer, or a deployment-ready blocking policy.
+The selected full-feature ridge logistic model achieved held-out average precision (AP) of 0.863 and ROC AUC of 0.957. At a threshold selected exclusively on validation data, it detected 67 of 84 test advertisements, with 25 false alarms among 542 non-advertisements. Test F1 was 0.761. The main finding is that web-context features substantially improve ranking beyond geometry alone, while the best model for ranking is not necessarily the best classifier at a particular threshold.
 
 \subsection{Provenance and unit of observation}
 The local \code{data/add.csv} contains 3,279 rows, 1,558 predictors, one class column, and an extra exported row index. Every predictor and label was compared with the original UCI \code{ad.data} download: numeric values, missingness positions, and labels match in row order. Feature names were recovered in order from \code{ad.names}. The source is credited to Nicholas Kushmerick; the repository identifies the dataset as Internet Advertisements, DOI \href{https://doi.org/10.24432/C5V011}{10.24432/C5V011} [2].
 
-The original study is Kushmerick (1999), \emph{Learning to remove Internet advertisements}, Proceedings of the Third Annual Conference on Autonomous Agents, pp. 175--181, DOI \url{https://doi.org/10.1145/301136.301186}. The source documentation identifies the supplied matrix as its STANDARD encoding and reports historical C4.5rules accuracy above 97\%. That result is not a replication target here: the original evaluation protocol has not been recovered reliably enough for a like-for-like comparison.
+The original study is Kushmerick (1999), \emph{Learning to remove Internet advertisements} [3], Proceedings of the Third Annual Conference on Autonomous Agents, pp. 175--181, DOI \url{https://doi.org/10.1145/301136.301186}. The source documentation identifies the supplied matrix as its STANDARD encoding and reports historical C4.5rules accuracy above 97\%. That result is not a replication target here: the original evaluation protocol has not been recovered reliably enough for a like-for-like comparison.
 
-One row represents a candidate image described through extracted attributes. Raw pixels, original page identifiers, timestamps for individual observations, site grouping identifiers, and an executable feature-extraction pipeline are not supplied. Sampling and annotation reliability cannot be reconstructed from the available matrix. The dataset is an archival benchmark; its sampling frame is not documented sufficiently to establish representativeness of current web images. The accompanying documentation dates data generation to April--July 1998 and identifies the STANDARD encoding used in the original study, emph{Learning to remove Internet advertisements} (1999). That historical context matters: URL conventions and image templates represented here are not a current-web sampling frame.
+One row represents a candidate image described through extracted attributes. The accompanying documentation dates data generation to April--July 1998. The supplied files contain measurements, encoded context indicators and class labels rather than the original images and pages. The available collection details and their implications are discussed in Section 6.
 
 The observed class counts are 459 ads (14.00\%) and 2,820 nonads (86.00\%). The accompanying original documentation instead states 458 and 2,821. The actual local and original data agree with each other, so all calculations use the measured counts, not the inconsistent prose. This discrepancy is documented rather than silently corrected in the source.
 
@@ -53,7 +50,7 @@ The observed class counts are 459 ads (14.00\%) and 2,820 nonads (86.00\%). The 
 \item How do ranking, probability quality, and classification trade-offs differ among a majority baseline, ridge logistic models, and a constrained decision tree?
 \item How uncertain are the final test estimates when repeated predictor patterns are treated as clusters, and what limits generalization?
 \end{enumerate}
-The empirical target is performance on withheld predictor-pattern groups from this dataset under the stated partition design. Broader population claims require additional sampling assumptions; this is not a probability sample of today's Internet.
+The analysis answers these questions using withheld predictor-pattern groups: records with identical predictors stay together throughout fitting and evaluation.
 
 \begin{table}[H]\centering\small
 \caption{Predictor families recovered from the original ordered dictionary.}
@@ -61,14 +58,14 @@ The empirical target is performance on withheld predictor-pattern groups from th
 Height, width, aspect ratio & 3 & Continuous geometric measurements\\
 Local & 1 & Binary locality indicator; exact operational rule unavailable\\
 URL terms & 457 & Binary phrase indicators from image URL\\
-Original-URL terms & 495 & Binary indicators in source code{origurl} family\\
+Original-URL terms & 495 & Binary indicators in source \code{origurl} family\\
 Anchor-URL terms & 472 & Binary phrase indicators from anchor URL\\
 Alt-text terms & 111 & Binary phrase indicators from alternative text\\
 Caption terms & 19 & Binary phrase indicators from nearby/caption context\\\midrule
 Total & 1,558 & Three continuous and 1,555 binary predictors\\\bottomrule
 \end{tabular}\label{tab:families}
 \end{table}
-Table~\ref{tab:families} shows that contextual indicators dominate dimensionality. A phrase indicator denotes the source encoding, not a directly verified linguistic or causal mechanism. The dictionary names geometry but does not provide explicit units; numerical dimensions are therefore reported in source units, rather than assigning undocumented units.
+Table~\ref{tab:families} shows that contextual indicators dominate dimensionality. For example, a row combines height, width and aspect ratio with indicators such as \code{url*ads}. A value of one records the presence of the corresponding encoded URL feature and zero its absence; it is not a word count. The source dictionary also includes multi-term names such as \code{url*images+buttons}. Thus each row describes both an image's shape and features of its surrounding web context. A phrase indicator denotes the source encoding, not a directly verified linguistic or causal mechanism. The dictionary names geometry but does not provide explicit units; numerical dimensions are therefore reported in source units, rather than assigning undocumented units.
 \section{Statistical and predictive background}
 \subsection{Binary outcomes, loss, and regularized logistic regression}
 Let $Y_i=1$ denote ad and $X_i$ the observed feature vector. Logistic regression models
@@ -90,25 +87,26 @@ With $z_{ij}=(x_{ij}-\mu_j)/s_j$, the fitting-scale ridge penalty shrinks standa
 
 
 \subsection{Constrained classification tree}
-A classification tree partitions feature space through sequential splits and assigns probabilities using terminal-node class frequencies. For binary classes, the default Gini impurity at a node with ad fraction $q$ is $G(q)=2q(1-q)$. A candidate split gains $G(q)-\{n_LG(q_L)+n_RG(q_R)\}/n$. This is a local improvement, not the AP criterion used to compare the completed trees. Sequential splits can express interactions: a URL indicator can matter in one width region and not another. Depth and minimum-node constraints limit that flexibility but do not establish stability. The \code{rpart} implementation uses classification splitting and a complexity parameter $cp$; larger $cp$ discourages splits with small improvements [3]. The tree here has maximum depth five and minimum split size 20. It provides a nonlinear comparator without building an extensive model-search exercise. Leaf probabilities are discrete and can be poorly calibrated; a strong classification threshold need not imply strong ranking across the entire score range.
+A classification tree partitions feature space through sequential splits and assigns probabilities using terminal-node class frequencies. For binary classes, the default Gini impurity at a node with ad fraction $q$ is $G(q)=2q(1-q)$. A candidate split gains $G(q)-\{n_LG(q_L)+n_RG(q_R)\}/n$. This is a local improvement, not the AP criterion used to compare the completed trees. Sequential splits can express interactions: a URL indicator can matter in one width region and not another. Depth and minimum-node constraints limit that flexibility but do not establish stability. The \code{rpart} implementation uses classification splitting and a complexity parameter $cp$; larger $cp$ discourages splits with small improvements [4]. The tree here has maximum depth five and minimum split size 20. It provides a nonlinear comparator without building an extensive model-search exercise. Leaf probabilities are discrete and can be poorly calibrated; a strong classification threshold need not imply strong ranking across the entire score range.
 
 \subsection{Metrics and decision thresholds}
-For counts TP, FP, FN and TN, with ad as positive,
+An advertisement is the positive class. A true positive (TP) is an ad correctly classified as ad; a false positive (FP) is a nonad incorrectly classified as ad. A false negative (FN) is a missed ad, and a true negative (TN) is a correctly classified nonad. Precision measures the fraction of predicted ads that are actually ads; recall measures the fraction of actual ads detected. Their harmonic mean, F1, balances these two fractions:
+
 \[\mathrm{precision}=\frac{TP}{TP+FP},\quad \mathrm{recall}=\frac{TP}{TP+FN},\quad F_1=\frac{2TP}{2TP+FP+FN}.\]
 Balanced accuracy averages sensitivity and specificity. Accuracy alone is insufficient: predicting every case as nonad already scores about 86\% here while detecting no ads. When no positive predictions occur, precision is recorded as zero by reporting convention, not as an estimated conditional probability.
 
 ROC AUC is the probability that a random positive receives a higher score than a random negative, counting ties as one half. AP aggregates precision over recall increments at distinct score thresholds:
 \[\mathrm{AP}=\sum_k(R_k-R_{k-1})P_k.\]
-Ties are pooled before computing increments. AP is not trapezoidal PR area [4], and depends on class prevalence. A constant-score classifier has AP equal to observed positive prevalence. The Brier score $n^{-1}\sum_i(p_i-y_i)^2$ evaluates squared probability error; smaller is better.
+Ties are pooled before computing increments. AP is not trapezoidal PR area [5], and depends on class prevalence. A constant-score classifier has AP equal to observed positive prevalence. The Brier score $n^{-1}\sum_i(p_i-y_i)^2$ evaluates squared probability error; smaller is better. Calibration means agreement between predicted probabilities and observed frequencies: among many candidates assigned probability .8, roughly 80\% should be ads. A reliability plot compares these quantities within score bins. Brier score assesses overall probability error, so it reflects both calibration and the ability to distinguish classes.
 
-Model selection maximizes training cross-validation AP. The final decision threshold maximizes validation F1, choosing the highest threshold if tied. AP selects ranking ability, whereas F1 selects one operating point; their preferences need not coincide. No business cost ratio is supplied, so this threshold is an explicit analytical convention, not an optimal ad-blocking policy. False blocking of useful content and missed advertisements may have very different costs.
+Model selection maximizes training cross-validation AP. The final decision threshold maximizes validation F1, choosing the highest threshold if tied. AP selects ranking ability, whereas F1 selects one operating point; their preferences need not coincide. F1 gives precision and recall equal emphasis; Section 6 examines how the observed trade-off changes when false positives and missed ads have different costs.
 
 \subsection{Metric meaning and prevalence}
 A ranking asks which candidate to inspect first; a probability asks how often similarly scored candidates are ads; a decision asks whether the consequences justify acting. AP evaluates the first, Brier assesses squared probability error, and F1 summarizes one decision set. For a four-record illustration with descending labels $(1,0,1,0)$, positive records arrive at recalls $1/2$ and $1$ with precisions $1$ and $2/3$, giving AP $\tfrac12(1)+\tfrac12(2/3)=5/6$. Moving probabilities without changing their order leaves AP unchanged but can change Brier and thresholded decisions.
 
 If sensitivity is $s$, false-positive rate is $f$, and ad prevalence is $\pi$, precision equals
 \[\frac{\pi s}{\pi s+(1-\pi)f}.\]
-The frozen test rates $s=67/84$ and $f=25/542$ give observed precision .728 at prevalence $84/626$, but about .149 at hypothetical prevalence .01. This is an algebraic scenario assuming unchanged class-conditional rates, not external validation. Benchmark ranking alone cannot establish positive predictive value in another environment.
+The frozen test rates $s=67/84$ and $f=25/542$ give observed precision .728 at prevalence $84/626$, but about .149 at hypothetical prevalence .01. This calculation holds sensitivity and false-positive rate fixed and illustrates why precision changes with the class mix.
 
 \subsection{Exploratory distribution comparisons and uncertainty}
 The rank comparison $U/(n_1n_0)$ summarizes the fraction of observed ad--nonad pairs for which the ad has a larger value, counting ties as one half. This is a descriptive, row-weighted measure of separation, not automatically a median effect. Missing measurements are excluded separately for each variable. Because repeated representations and unobserved website dependence undermine an independent-row reference distribution, geometry significance tests are not used as evidence in this report. The analysis exports descriptive rank separation without independent-row significance tests.
@@ -138,6 +136,8 @@ A random row split could place indistinguishable representations on both sides o
 Table~\ref{tab:split} reflects approximately 60/20/20\% of patterns, not exactly those percentages of rows. Groups are stratified by majority label (ties assigned to ad); within each stratum their allocation is randomized. The delivered split assignments identify the evaluation sample; robustness to alternative allocations is not estimated. Labels are used for stratification, not to compute feature transformations. The partition is a designed benchmark comparison, not a guarantee of naturally occurring deployment prevalence.
 
 \subsection{Training-only transformations and model selection}
+Training, validation and test data have distinct roles. Training data estimate coefficients, tree splits and preprocessing values. Five-fold cross-validation repeatedly fits on four training folds and scores the fifth; the held-out AP values guide parameter and model selection. Validation data choose the decision threshold for the selected fitted model. Test data then estimate its performance on observations not used for either fitting or selection.
+
 The three geometry variables undergo $\log(1+x)$ transformation. Four missingness indicators are appended. Medians are learned separately from each training fold, and used to fill corresponding fold-held-out data. For binary locality, the median is a modal value here. No class balancing, oversampling, or synthetic rows are introduced.
 
 The five-fold training procedure keeps identical patterns together. Ridge models examine 25 logarithmically spaced penalties from $10^2$ to $10^{-4}$; the tree examines $cp\in\{.001,.005,.01,.02,.05\}$. Each model's parameter maximizes the unweighted mean of five fold AP values. The winning model family is also selected by this training-only criterion. Mean fold AP need not equal AP of pooled out-of-fold predictions.
@@ -208,7 +208,7 @@ Let $h,w,r$ denote the imputed log1p geometry values, $l$ the imputed locality, 
 \input{generated/geometry_equation.tex}
 This equation shows why a ranking score need not cross 0.5 even when groups differ descriptively: the intercept and regularized contributions jointly determine the probability. Coefficients refer to transformed, imputed features and are not causal effects.
 
-The fitted tree has seven splits and eight leaves. Its first split is at log1p width 6.053181, corresponding to source width about 424.46; its wider branch splits again near source width 484.92. In the narrower branch, indicators corresponding to \code{ancurl*com}, \code{ancurl*click}, \code{url*ads}, \code{url*ad}, and \code{ancurl*home} distinguish leaves. A wide-image leaf contains 132 training cases with estimated ad probability .9773. The largest low-score leaf contains 1,714 cases with estimated probability .0280. These are training proportions, not externally validated rule probabilities; sparse leaves can be unstable.
+The fitted tree has seven splits and eight leaves. Its first split is at log1p width 6.053181, corresponding to source width about 424.46; its wider branch splits again near source width 484.92. In the narrower branch, indicators corresponding to \code{ancurl*com}, \code{ancurl*click}, \code{url*ads}, \code{url*ad}, and \code{ancurl*home} distinguish leaves. A wide-image leaf contains 132 training cases with estimated ad probability .9773. The largest low-score leaf contains 1,714 cases with estimated probability .0280. The leaf counts show how much training support each rule has.
 
 The full ridge has 1,544 nonzero fitted slopes. Ridge shrinks rather than generally selects variables, so this count is not evidence of 1,544 independent discoveries. The concrete feature-signature failure below illustrates behavior more directly than a ranking of raw coefficient magnitudes.
 
@@ -225,13 +225,13 @@ Figure~\ref{fig:tree} displays the interaction of width and URL conditions descr
 \end{table}
 \textbf{Result.} The final tuned ridge correctly identifies 67 ads and 517 nonads, missing 17 ads and falsely flagging 25 nonads. Balanced accuracy is 0.8757; specificity is 0.9539. The raw test accuracy is lower than that of the tree, and the tree also has higher test F1 at its fixed 0.5 threshold (Table~\ref{tab:test}). Full ridge nevertheless has better ranking AP and ROC AUC in this comparison.
 
-\textbf{Interpretation.} There is no uniformly best model across metrics. Geometry ridge ranks ads above nonads moderately well but makes no ad predictions at 0.5: discrimination and a fixed decision threshold are different questions. Lowering full-ridge's threshold raises recall from 0.607 to 0.798 while reducing precision from 0.981 to 0.728. A user-facing blocking system might prefer higher precision; F1 does not encode that preference.
+\textbf{Interpretation.} There is no uniformly best model across metrics. Geometry ridge ranks ads above nonads moderately well but makes no ad predictions at 0.5: discrimination and a fixed decision threshold are different questions. Lowering full-ridge's threshold raises recall from 0.607 to 0.798 while reducing precision from 0.981 to 0.728. The gain in recall therefore needs to be considered alongside the additional false alarms.
 
-\textbf{Conclusion.} Full-context information materially improves held-out ranking over the geometry/locality comparator. The chosen threshold provides a reproducible example of an operating point, not evidence that automatic blocking is safe or economically optimal. The drop from validation F1 0.918 to test F1 0.761 shows substantial development-to-test variation; possible contributors include threshold selection, finite positive counts, and clustered sample composition. Their separate contributions are not identified here.
+\textbf{Conclusion.} Full-context information materially improves held-out ranking over the geometry/locality comparator. Lowering the ridge threshold detects more ads, but the additional false positives largely offset that gain in F1. Validation F1 of 0.918 falls to 0.761 on test; the error analysis below examines the sample patterns behind this difference.
 
 \begin{figure}[H]\centering\includegraphics[width=\textwidth]{../analysis/results/performance.pdf}
 \caption{Held-out ranking curves for all three fitted comparators. Legends report AUC and AP; dashed lines show random-ranking ROC and test-prevalence PR baselines.}\label{fig:curves}\end{figure}
-Figure~\ref{fig:curves} shows the full ridge's stronger overall ranking relative to geometry and the tree, but does not imply superiority at every recall or operating point. The tree has relatively few distinct leaf probabilities, hence a coarse curve. Tied scores enter together; AP .8625 is the sum over recall increments, not the trapezoidal area of a smoothed line. The PR display exposes false alarms among retrieved candidates more directly than ROC when nonads are common.
+Figure~\ref{fig:curves} connects the ranking and classification results. The tree assigns only eight distinct test scores, compared with 484 for full ridge. Of the 45,528 possible test ad--nonad pairs, 10,645 receive tied tree scores. Its leaves therefore make useful decisions at .5 while grouping many images at the same probability, limiting ranking resolution. Full ridge separates scores more finely and achieves higher AP, yet its validation-selected threshold admits more nonads. Geometry ridge illustrates the opposite threshold problem: it ranks cases usefully but all scores remain below .5. Ranking, probability estimation and thresholded classification are consequently three different aspects of performance. Tied scores enter together; AP .8625 is the sum over recall increments, not the trapezoidal area of a smoothed line. The PR display exposes false alarms among retrieved candidates more directly than ROC when nonads are common.
 
 \begin{figure}[H]\centering\includegraphics[width=.65\textwidth]{../analysis/results/confusion.pdf}
 \caption{Test confusion counts at the validation-selected threshold 0.1481484.}\label{fig:confusion}\end{figure}
@@ -260,7 +260,9 @@ The validation decisions are unchanged throughout approximately $(.1456895,.1481
 \caption{Cluster-bootstrap percentile intervals for the frozen model and threshold (1,000 resamples).}
 \input{generated/ci.tex}\label{tab:ci}
 \end{table}
-\textbf{Result.} The paired AP difference interval excludes zero under the test-group resampling design (Table~\ref{tab:ci}). Precision uncertainty is appreciable. The pairing uses the same resampled groups for both model predictions; this is more appropriate than comparing separate, unpaired intervals.
+\textbf{Result.} Full ridge improves AP over geometry ridge by 0.4000, with a conditional 95\% interval of [0.2053, 0.5418] (Table~\ref{tab:ci}). This is a gain in AP units, not a 40\% increase in accuracy. The entire interval is positive, supporting a substantial ranking improvement under the cluster-sampling model. Precision has a much wider interval, [0.5098, 0.9296], so the proportion of correct ad predictions at the selected threshold is less precisely estimated.
+
+The pairing uses the same resampled groups for both models, comparing their performance on the same easy and difficult cases. A 95\% confidence procedure is intended to cover the population quantity in about 95\% of repeated samples under its assumptions. Interval width expresses estimation precision; it is not the range containing 95\% of individual predictions.
 
 \textbf{Interpretation.} These intervals describe a fixed predictor and threshold, conditional on the development data and an exchangeable-pattern-group approximation. They are not confidence statements for retraining on arbitrary future samples, and do not account for site-level dependencies. No strong distributional approximation for F1 is imposed, but bootstrap inference with only 84 ads and an unknown sampling frame remains approximate.
 
@@ -271,38 +273,32 @@ The Brier score is 0.0467 for ridge, 0.0435 for the tree and 0.1163 for the trai
 \caption{Post-evaluation probability assessment: reliability bins with record counts and the class-specific score distribution.}\label{fig:reliability}\end{figure}
 Figure~\ref{fig:reliability} makes the bin sizes visible. The high observed fractions above score .4 suggest underprediction in those bins, but there are only 15, 8 and 35 records in the three upper bins. The lowest bin contains 540 records. Connecting bin averages is a descriptive display, not an estimated calibration function or an independent-sampling confidence statement. The histogram distinguishes concentrated low nonad scores from sparse high-score regions. No test-based recalibration is applied.
 \section{Discussion, limitations, and extensions}
-\subsection{Answers and strengths}
-The first question is addressed descriptively by measured geometry differences and missingness: observed ad widths and aspect ratios are substantially larger, while missing geometry is more common among nonads. The second is answered by the held-out AP improvement of approximately 0.400 over geometry/locality and its paired conditional interval. The third is answered by the metric trade-off: full ridge leads on ranking, while the constrained tree leads on test F1 and Brier score. The fourth is answered by wide precision/F1 intervals and the limitations of the exchangeable-group approximation.
+\subsection{Answers to the research questions}
+\textbf{1. What distinguishes the geometric measurements?} Width provides the strongest observed separation: in training, its rank separation is .841, versus .640 for height. Ads concentrate at particular dimensions, whereas nonads have a wider variety of shapes. Height means alone obscure this structure: the ad height interquartile range is concentrated at 60 even though its mean is close to the nonad mean. Missing geometry is also more common among nonads, so complete-case summaries describe a different class mix from the full sample.
 
-Keeping identical predictor patterns together reduces one identifiable source of optimistic evaluation. The separate validation partition keeps threshold selection out of the reported test calculation. Neither design choice explains the observed errors or establishes transfer to new websites. The ranking result is favorable, but threshold transfer is imperfect and the selected model is not best on every metric.
+\textbf{2. What do context features add?} Test AP rises from .4626 for geometry/locality ridge to .8625 for full ridge. The paired interval for the .4000 gain is entirely positive. Thus the contextual representation supplies substantial information beyond shape and locality. Greater anchor-URL and alternative-text activity among ads helps describe that representation, although the comparison evaluates the whole added feature set rather than individual families.
 
-\subsection{Threats to validity}
-\textbf{Representation and sampling.} The dataset describes an archival extracted representation, not contemporary pixels. Distinct patterns may come from the same website or template. The absent site identifiers prevent domain-held-out evaluation. The feature vocabulary itself was constructed before this study; the raw corpus is unavailable, so vocabulary-construction independence from evaluation examples cannot be verified. Splitting the supplied matrix cannot repair that upstream risk.
+\textbf{3. Which model performs best?} Full ridge leads on AP and ROC AUC, while the tree has higher observed F1 (.8158 versus .7614 for tuned ridge) and lower Brier score. The tree's discrete leaves and ridge's finer scores explain why these rankings need not agree. Geometry ridge's zero recall at .5 shows why judging a model only by its default threshold would miss its ranking ability. Model choice therefore follows the analytical objective: this study selected ranking by AP, then examined a separate classification threshold.
 
-\textbf{Annotation and information loss.} Conflicting labels on identical features may reflect annotation errors or distinctions omitted by the representation. Neither explanation is established. Raw images and adjudication records would be needed. Context indicators may encode domain-specific shortcuts rather than broadly transferable advertisement characteristics.
+\textbf{4. What does uncertainty reveal?} The positive AP-gain interval supports the central comparison, but precision and F1 intervals are wide. Error composition explains why: one repeated nonad signature contributes 15 of the 25 false positives, and missing-geometry test cases have much poorer F1. These observations show how a relatively small number of patterns can affect the apparent success of a threshold.
 
-\textbf{Missingness and preprocessing.} Median imputation is simple and reproducible but is not a model of the missing-data mechanism. Indicators allow availability-based prediction that may fail under changed extraction conditions. No imputation uncertainty is propagated into the predictive bootstrap. Log transforms impose a specific geometric scaling; sensitivity to that choice was not exhaustively studied.
+\subsection{Strengths and limitations}
+The study combines an interpretable geometry comparator, a regularized full-feature model and a nonlinear tree. Keeping identical signatures together avoids evaluating a model on copies of training representations; a separate validation set chooses the threshold before test evaluation. The fitted equation, tree, worked prediction and generated result tables make the analysis reproducible and connect numerical results to actual model behavior.
 
-\textbf{Selection and precision.} One fixed grouped split is not a study of training instability. A five-fold parameter search may overfit its CV criterion, and F1 tuning may exploit validation-specific composition. Reported test uncertainty holds those choices fixed. Tree complexity selection reaches a grid boundary, and no claim of algorithmic optimality follows. The test partition contains no conflicting-label group, which limits what it says about ambiguous representations.
-
-\textbf{Interpretation.} Ridge coefficients should not be read as discoveries with ordinary confidence intervals. For example, \code{origurl*zdnet.com} has a large positive fitted coefficient, but rare terms, correlated indicators and standardization make a raw-coefficient ranking unsuitable as a general feature-importance ranking. Contextual features are predictive associations, not evidence that adding a phrase causes an image to become an ad.
-
-\textbf{Population validity.} Confidence intervals rely on assumptions not secured by the source sampling documentation. Observed benchmark discrimination does not establish effectiveness for new domains, languages, rendering systems, or a new ad prevalence. AP, precision and F1 are particularly sensitive to prevalence and decision policy. The source's historical accuracy claim is not a comparable benchmark because its split and evaluation protocol differ.
+Three limitations matter to interpretation. First, the supplied matrix lacks original images, page identifiers and detailed annotation records. Different signatures may share a website, and conflicting labels may reflect annotation differences or information absent from the features. Second, the intervals assume independent signature clusters and hold fitted models and tuning choices fixed; they measure test-sample uncertainty, not variation from repeating the entire study. Third, sparse correlated indicators and class-associated missing geometry complicate interpretation: fitted slopes are associations, and the larger model comparison does not isolate individual feature families. These limitations qualify the statistical interpretation without changing the observed comparisons.
 
 \subsection{What would justify an action?}
 On the fixed test sample, changing full ridge from .5 to the selected threshold recovers 16 additional ads but creates 24 additional false positives. Let $c_{FN}$ be the loss from a missed ad and $c_{FP}$ the loss from falsely blocking a nonad. The observed loss change is
 \[L_{tuned}-L_{.5}=24c_{FP}-16c_{FN}.\]
 The tuned policy has lower observed loss than .5 only when $c_{FP}/c_{FN}<2/3$. This retrospectively describes two already-reported policies; it is not a test-selected rule or population break-even estimate. It shows why F1 optimization can conflict with avoiding false blocking.
 
-If $p$ were calibrated for deployment, predicting ad has conditional loss $c_{FP}(1-p)$ and predicting nonad has loss $c_{FN}p$. Minimum loss requires $p>c_{FP}/(c_{FP}+c_{FN})$. Neither those costs nor deployment-calibrated probabilities are available. The delivered output is a benchmark ranking with an illustrative binary operating point, not an asserted blocking policy.
+If $p$ were calibrated for deployment, predicting ad has conditional loss $c_{FP}(1-p)$ and predicting nonad has loss $c_{FN}p$. Minimum loss requires $p>c_{FP}/(c_{FP}+c_{FN})$. This explains why a threshold chosen by F1 need not minimize a particular cost: the two objectives weight mistakes differently.
 
 \subsection{Targeted extensions}
-The highest-value extension is a newly labeled collection with raw images, page/domain identifiers, extraction documentation, and an adjudication procedure. A domain-held-out test could then address template leakage, and a later collection could address temporal transfer. This would resolve a more important limitation than adding algorithms to the current split.
-
-A deployment-oriented study should define false-blocking and missed-ad costs, use a new validation sample to select a cost-sensitive threshold, and investigate abstention for uncertain cases. Calibration should be fit on development data only and evaluated on a fresh test set. If estimating retraining variability becomes important, repeat grouped outer evaluation with inner tuning, while keeping domain groups intact when available. These extensions are proposals, not results already demonstrated.
+Two extensions follow directly from the findings. A development-data comparison that adds one context family at a time could clarify which families contribute most to ranking. A new grouped evaluation could then examine whether the missing-geometry weakness and repeated-signature errors recur. Any revised feature set or threshold should be evaluated on new held-out data rather than selected to improve the test results already examined here.
 
 \subsection{Final conclusion}
-A regularized full-context classifier provides useful held-out ranking within the supplied Internet Advertisements benchmark. At the validation-selected operating point, test precision is 0.728 and recall is 0.798, with substantial uncertainty and a clear validation-to-test F1 decline. The defensible claim is improved benchmark discrimination over a geometry/locality comparator, not universal advertisement recognition or a ready-to-deploy blocking system.
+Web-context features substantially improve advertisement ranking over geometry and locality alone: full ridge achieves test AP .8625 versus .4626, with a paired 95\% interval of [.2053, .5418] for the gain. Width is the most informative geometric measurement, but geometry alone does not produce useful ad decisions at the default .5 threshold. The tree achieves better test F1 at its reported operating point, demonstrating that stronger ranking does not automatically mean stronger thresholded classification. Finally, the concentration of false positives in one repeated signature explains why overall metrics should be read alongside the actual errors. Together, these results answer the project's questions about feature information, model behavior and estimation uncertainty.
 \section{Data, code, and reproducibility sources}
 \begin{itemize}
 \item Original dataset and attribution: \url{https://archive.ics.uci.edu/dataset/51/internet+advertisements}; DOI \url{https://doi.org/10.24432/C5V011}. Repository license: CC BY 4.0.
@@ -324,6 +320,7 @@ Run from the project root: \code{Rscript analysis/run.R}, then \code{python3 ana
 \begin{enumerate}
 \item Friedman, J., Hastie, T., and Tibshirani, R. \emph{An Introduction to glmnet}. Official glmnet documentation. \url{https://glmnet.stanford.edu/articles/glmnet.html}.
 \item Kushmerick, N. (1999). \emph{Internet Advertisements} [Dataset]. UCI Machine Learning Repository. \url{https://doi.org/10.24432/C5V011}. Original accompanying files: \code{ad.DOCUMENTATION}, \code{ad.names}.
+\item Kushmerick, N. (1999). \emph{Learning to remove Internet advertisements}. Proceedings of the Third Annual Conference on Autonomous Agents, 175--181. \url{https://doi.org/10.1145/301136.301186}.
 \item R Core / rpart documentation. \emph{Control for Rpart Fits}. \url{https://stat.ethz.ch/R-manual/R-devel/library/rpart/html/rpart.control.html}.
 \item Scikit-learn developers. \emph{average\_precision\_score}. Official API documentation. \url{https://scikit-learn.org/stable/modules/generated/sklearn.metrics.average_precision_score.html}.
 \end{enumerate}
