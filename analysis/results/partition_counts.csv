@@ -1,0 +1,4 @@
+"partition","n","groups","ad","nonad"
+"train",1984,1452,288,1696
+"validation",669,484,87,582
+"test",626,484,84,542

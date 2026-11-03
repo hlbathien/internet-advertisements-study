@@ -1,0 +1,5 @@
+partition,missing_geometry,n,ads,TP,FP,F1
+validation,False,472,73,68,5,0.9315068493150684
+validation,True,197,14,10,0,0.8333333333333334
+test,False,437,71,61,8,0.8714285714285714
+test,True,189,13,6,17,0.3333333333333333

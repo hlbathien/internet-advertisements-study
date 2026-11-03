@@ -1,0 +1,41 @@
+{
+  "source_exact_match": true,
+  "source_sha256": "8b1cc86be7ea543323b557164b28dd4c8f3f6a88e16d88b6b0685e13860e2ab0",
+  "missing_any": 920,
+  "missing_any_geometry": 910,
+  "binary_density": 0.008209726545109368,
+  "families": {
+    "height": 1,
+    "width": 1,
+    "aratio": 1,
+    "local": 1,
+    "url": 457,
+    "origurl": 495,
+    "ancurl": 472,
+    "alt": 111,
+    "caption": 19
+  },
+  "contradictory_group_sizes": {
+    "310": {
+      "count": 49,
+      "sum": 1
+    },
+    "315": {
+      "count": 3,
+      "sum": 2
+    },
+    "382": {
+      "count": 2,
+      "sum": 1
+    }
+  },
+  "irreducible_in_sample_errors_from_identical_features": 3,
+  "validation_selected_F1": 0.9176470588235294,
+  "test_one_representative_per_group": {
+    "AP": 0.8842892390635879,
+    "ROC_AUC": 0.9584224129678676,
+    "F1": 0.8187919463087249,
+    "n": 484
+  },
+  "verified_models": 5
+}

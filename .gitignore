@@ -1,0 +1,14 @@
+.pi/
+AGENTS.md
+examples/
+docs/
+analysis/*.md
+analysis/source/*_web.json
+analysis/results/critique_fitted_models.txt
+analysis/results/calibration.csv
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+__pycache__/
+*.pyc
